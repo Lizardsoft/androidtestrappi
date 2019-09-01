@@ -140,7 +140,7 @@ public class PlaceholderFragment extends Fragment {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (visibleItemCount != 0 && ((firstVisibleItem + visibleItemCount) >= (totalItemCount))) {
+                if (visibleItemCount != 0 && ((firstVisibleItem + visibleItemCount) >= (totalItemCount-1))) {
                     if (frameLayout.getChildCount() == 0) {
                         loadMore();
                     }
@@ -201,7 +201,6 @@ public class PlaceholderFragment extends Fragment {
                 }
                 frameLayout.removeAllViews();
                 frameLayout.addView(footerView);
-                listView.setSelection(listView.getCount() - 1);
             } else {
                 if (type == StateType.RETRY) {
                     (retry_Layout.findViewById(R.id.progressBar)).setVisibility(View.GONE);
