@@ -169,7 +169,7 @@ public class PlaceholderFragment extends Fragment {
         return R.id.nav_series;
     }
 
-    public void cancelAllRequest(){
+    public void cancelAllRequest() {
         apiRequest.cancelAll();
     }
 
@@ -276,7 +276,8 @@ public class PlaceholderFragment extends Fragment {
         @Override
         public void onFailure(@NonNull Call call, @NonNull Throwable t) {
             Log.d(TAG, "onFailure");
-            setStatePost(StateType.RETRY);
+            if (!call.isCanceled())
+                setStatePost(StateType.RETRY);
         }
     }
 
