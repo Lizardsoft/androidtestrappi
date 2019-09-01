@@ -23,12 +23,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiRequest {
     private GetServiceThemoviedb postService;
+    private final OkHttpClient okHttpClient;
 
     public ApiRequest(Context context) {
         final long cacheSize = (5 * 1024 * 1024);
         final Cache myCache = new Cache(context.getCacheDir(), cacheSize);
 
-        final OkHttpClient okHttpClient = new OkHttpClient.Builder()
+        okHttpClient = new OkHttpClient.Builder()
                 .cache(myCache)
                 .addInterceptor(new AddInterceptorCache(context))
                 .addNetworkInterceptor(new AddNetworkInterceptorCache()).build();
@@ -46,6 +47,10 @@ public class ApiRequest {
         postService = retrofit.create(GetServiceThemoviedb.class);
     }
 
+    public void cancelAll() {
+        okHttpClient.dispatcher().cancelAll();
+    }
+
     @SuppressWarnings("unchecked")
     public void getData(Callback callback, String navigationTypePath, String categoryPath, int page) {
         Call call;
@@ -54,7 +59,6 @@ public class ApiRequest {
         } else {
             call = postService.getDataTv(navigationTypePath, categoryPath, page);
         }
-
         call.enqueue(callback);
     }
 

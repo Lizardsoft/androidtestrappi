@@ -22,4 +22,8 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="navText">
+        <item name="android:textSize">11sp</item>
+    </style>
+
 </resources>

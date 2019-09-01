@@ -48,12 +48,12 @@ public class MainActivity extends AppCompatActivity {
                             break;
                     }
                     toolbar.collapseActionView();
+                    viewPagerFragment.cancelAllRequest();
                     if (viewPager.getAdapter() != null) {
                         viewPager.getAdapter().notifyDataSetChanged();
                         return true;
                     }
                 }
-
                 return false;
             }
         });

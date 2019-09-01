@@ -11,7 +11,6 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -39,17 +38,19 @@ public class PlaceholderFragment extends Fragment {
     private String categoryPath = "popular";
     private MovieItemAdapter movieItemAdapter;
     private TvItemAdapter tvItemAdapter;
-    private boolean loading = false;
 
     private View footerView;
     private FrameLayout frameLayout;
     private ConstraintLayout retry_Layout;
 
     private TextView textView_not_Info;
-    private ProgressBar progressBar;
     private ListView listView;
 
-    private ApiRequest apiRequest;
+    private static ApiRequest apiRequest;
+
+    private enum StateType {
+        GONE, LOADING, RETRY
+    }
 
     public static PlaceholderFragment newInstance(int index) {
         PlaceholderFragment fragment = new PlaceholderFragment();
@@ -88,13 +89,11 @@ public class PlaceholderFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View root = inflater.inflate(R.layout.fragment_main, container, false);
         textView_not_Info = root.findViewById(R.id.textView_not_Info);
-        progressBar = root.findViewById(R.id.progressBar);
         listView = root.findViewById(R.id.listmovies);
         retry_Layout = root.findViewById(R.id.retry_Layout);
 
         movieItemAdapter = null;
         tvItemAdapter = null;
-        loading = false;
 
         footerView = inflater.inflate(R.layout.footer_layout, container, false);
         if (getContext() != null) {
@@ -112,7 +111,7 @@ public class PlaceholderFragment extends Fragment {
         retry_Layout.findViewById(R.id.button_retry).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getPost(1);
+                getDataApi(1);
             }
         });
 
@@ -141,7 +140,7 @@ public class PlaceholderFragment extends Fragment {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (visibleItemCount != 0 && ((firstVisibleItem + visibleItemCount) >= (totalItemCount)) && !loading) {
+                if (visibleItemCount != 0 && ((firstVisibleItem + visibleItemCount) >= (totalItemCount))) {
                     if (frameLayout.getChildCount() == 0) {
                         loadMore();
                     }
@@ -149,26 +148,82 @@ public class PlaceholderFragment extends Fragment {
             }
         });
 
-        getPost(1);
+        getDataApi(1);
         return root;
+    }
+
+    public void filterListview(String s) {
+        if (navigationTypePath.equalsIgnoreCase("movie")) {
+            if (movieItemAdapter != null) movieItemAdapter.getFilter().filter(s);
+        } else {
+            if (tvItemAdapter != null) tvItemAdapter.getFilter().filter(s);
+        }
+    }
+
+    public void setNavigationTypePath(String value) {
+        navigationTypePath = value;
+    }
+
+    public int getNavigationTypePath() {
+        if (navigationTypePath.equalsIgnoreCase("movie")) return R.id.nav_movies;
+        return R.id.nav_series;
+    }
+
+    public void cancelAllRequest(){
+        apiRequest.cancelAll();
     }
 
     private void loadMore() {
         if (navigationTypePath.equalsIgnoreCase("movie")) {
             if (movieItemAdapter != null && movieItemAdapter.getPage() < movieItemAdapter.getTotalPages() && !movieItemAdapter.isFiltered())
-                getPost(movieItemAdapter.getPage() + 1);
+                getDataApi(movieItemAdapter.getPage() + 1);
         } else {
             if (tvItemAdapter != null && tvItemAdapter.getPage() < tvItemAdapter.getTotalPages() && !tvItemAdapter.isFiltered())
-                getPost(tvItemAdapter.getPage() + 1);
+                getDataApi(tvItemAdapter.getPage() + 1);
         }
     }
 
-    private void setVisibilityFooter(int visibility) {
-        if (visibility == View.VISIBLE) {
+    private void setStatePost(StateType type) {
+        Log.d(TAG, "setStatePost: " + type);
+        if (type == StateType.GONE) {
             frameLayout.removeAllViews();
-            frameLayout.addView(footerView);
+            retry_Layout.setVisibility(View.GONE);
         } else {
-            frameLayout.removeAllViews();
+            if (listView.getAdapter() != null) {
+                if (type == StateType.RETRY) {
+                    (footerView.findViewById(R.id.progressBar)).setVisibility(View.GONE);
+                    (footerView.findViewById(R.id.button_retry)).setVisibility(View.VISIBLE);
+                    (footerView.findViewById(R.id.footer_label)).setVisibility(View.VISIBLE);
+                } else {
+                    (footerView.findViewById(R.id.progressBar)).setVisibility(View.VISIBLE);
+                    (footerView.findViewById(R.id.button_retry)).setVisibility(View.GONE);
+                    (footerView.findViewById(R.id.footer_label)).setVisibility(View.GONE);
+                }
+                frameLayout.removeAllViews();
+                frameLayout.addView(footerView);
+                listView.setSelection(listView.getCount() - 1);
+            } else {
+                if (type == StateType.RETRY) {
+                    (retry_Layout.findViewById(R.id.progressBar)).setVisibility(View.GONE);
+                    (retry_Layout.findViewById(R.id.button_retry)).setVisibility(View.VISIBLE);
+                    (retry_Layout.findViewById(R.id.footer_label)).setVisibility(View.VISIBLE);
+                } else {
+                    (retry_Layout.findViewById(R.id.progressBar)).setVisibility(View.VISIBLE);
+                    (retry_Layout.findViewById(R.id.button_retry)).setVisibility(View.GONE);
+                    (retry_Layout.findViewById(R.id.footer_label)).setVisibility(View.GONE);
+                }
+                retry_Layout.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private void getDataApi(int page) {
+        Log.d(TAG, "getPosts");
+
+        if (apiRequest != null) {
+            setStatePost(StateType.LOADING);
+            textView_not_Info.setVisibility(View.GONE);
+            apiRequest.getData(callbackResponse, navigationTypePath, categoryPath, page);
         }
     }
 
@@ -188,6 +243,7 @@ public class PlaceholderFragment extends Fragment {
                         movieItemAdapter = new MovieItemAdapter(getActivity(), data.getResults(), data.getTotal_pages());
                         listView.setAdapter(movieItemAdapter);
                     }
+                    setStatePost(StateType.GONE);
                 }
             } else if (response.body() instanceof TvResponse) {
                 TvResponse data = (TvResponse) response.body();
@@ -201,64 +257,27 @@ public class PlaceholderFragment extends Fragment {
                         tvItemAdapter = new TvItemAdapter(getActivity(), data.getResults(), data.getTotal_pages());
                         listView.setAdapter(tvItemAdapter);
                     }
+                    setStatePost(StateType.GONE);
                 }
             } else {
-                if (apiRequest.hasNetwork(getContext())) {
-                    tvItemAdapter = null;
-                    movieItemAdapter = null;
-                    textView_not_Info.setVisibility(View.VISIBLE);
-                } else {
-                    if (listView.getAdapter() == null) {
-                        retry_Layout.setVisibility(View.VISIBLE);
+                if (getContext() != null) {
+                    if (apiRequest.hasNetwork(getContext())) {
+                        tvItemAdapter = null;
+                        movieItemAdapter = null;
+                        setStatePost(StateType.GONE);
+                        textView_not_Info.setVisibility(View.VISIBLE);
                     } else {
-                        setVisibilityFooter(View.VISIBLE);
+                        setStatePost(StateType.RETRY);
                     }
                 }
             }
-            progressBar.setVisibility(View.GONE);
-            loading = false;
         }
 
         @Override
         public void onFailure(@NonNull Call call, @NonNull Throwable t) {
             Log.d(TAG, "onFailure");
-            progressBar.setVisibility(View.GONE);
-            if (listView.getAdapter() == null) {
-                retry_Layout.setVisibility(View.VISIBLE);
-            } else {
-                setVisibilityFooter(View.VISIBLE);
-            }
-            loading = false;
+            setStatePost(StateType.RETRY);
         }
     }
 
-    private void getPost(int page) {
-        Log.d(TAG, "getPosts");
-
-        if (apiRequest != null) {
-            loading = true;
-            progressBar.setVisibility(View.VISIBLE);
-            textView_not_Info.setVisibility(View.GONE);
-            setVisibilityFooter(View.GONE);
-            retry_Layout.setVisibility(View.GONE);
-            apiRequest.getData(callbackResponse, navigationTypePath, categoryPath, page);
-        }
-    }
-
-    public void filterListview(String s) {
-        if (navigationTypePath.equalsIgnoreCase("movie")) {
-            if (movieItemAdapter != null) movieItemAdapter.getFilter().filter(s);
-        } else {
-            if (tvItemAdapter != null) tvItemAdapter.getFilter().filter(s);
-        }
-    }
-
-    public void setNavigationTypePath(String value) {
-        navigationTypePath = value;
-    }
-
-    public int getNavigationTypePath() {
-        if (navigationTypePath.equalsIgnoreCase("movie")) return R.id.nav_movies;
-        return R.id.nav_series;
-    }
 }

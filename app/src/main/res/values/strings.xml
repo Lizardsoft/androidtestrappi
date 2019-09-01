@@ -16,8 +16,8 @@
     <string name="information">Información</string>
     <string name="original_title">Título original</string>
     <string name="state">Estado</string>
-    <string name="release_date">Información del Estreno</string>
-    <string name="original_language">Lenguaje Original</string>
+    <string name="release_date">Información del estreno</string>
+    <string name="original_language">Lenguaje original</string>
     <string name="runtime">Duración</string>
     <string name="budget">Presupuesto</string>
     <string name="revenue">Ingresos</string>
@@ -29,4 +29,6 @@
     <string name="number_of_seasons">Numero de temporadas</string>
     <string name="original_name">Nombre original</string>
     <string name="retry">Reintentar</string>
+    <string name="movies">Peliculas</string>
+    <string name="series">Series</string>
 </resources>
