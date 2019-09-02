@@ -5,4 +5,8 @@
     <dimen name="appbar_padding">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="appbar_padding_top">8dp</dimen>
+    <dimen name="image_backdrop_height">215dp</dimen>
+    <dimen name="image_Poster_marginTop">149dp</dimen>
+    <dimen name="image_Poster_width">101dp</dimen>
+    <dimen name="image_Poster_height">132dp</dimen>
 </resources>

@@ -39,7 +39,7 @@ public class ApiRequest {
         final Gson gson = gsonBuilder.create();
 
         final Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.themoviedb.org/3/")
+                .baseUrl("http://api.themoviedb.org/3/")
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(okHttpClient)
                 .build();
