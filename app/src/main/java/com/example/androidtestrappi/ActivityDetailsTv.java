@@ -1,11 +1,10 @@
 package com.example.androidtestrappi;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -14,10 +13,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.androidtestrappi.negocio.TvDetailsResponse;
 import com.example.androidtestrappi.persistencia.ApiRequest;
+import com.example.androidtestrappi.persistencia.GetServiceThemoviedb;
 import com.google.android.youtube.player.YouTubeStandalonePlayer;
 
 import java.text.SimpleDateFormat;
@@ -28,10 +33,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ActivityDetailsTv extends AppCompatActivity {
-    private static final String YOUTUBE_API_KEY = "<Api Key>";
+    private static final String YOUTUBE_API_KEY = "AIzaSyBsOoXmr--RxNv0v8o7aFOsOkcehN--s4U";
     private final CallbackResponse callbackResponse = new CallbackResponse();
     private String idVideo;
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,7 +77,7 @@ public class ActivityDetailsTv extends AppCompatActivity {
         @Override
         public void onResponse(@NonNull Call call, @NonNull Response response) {
             TvDetailsResponse data = (TvDetailsResponse) response.body();
-            final String MOVIE_BASE_URL = "http://image.tmdb.org/t/p/w780";
+            final String MOVIE_BASE_URL = GetServiceThemoviedb.URL_IMG+ "t/p/w780";
 
             if (data != null) {
                 ImageView image_backdrop = findViewById(R.id.image_backdrop);
@@ -80,7 +86,7 @@ public class ActivityDetailsTv extends AppCompatActivity {
                 ProgressBar progressBar_user_score = findViewById(R.id.progressBar_user_score);
                 TextView textView_user_score_value = findViewById(R.id.textView_user_score_value);
                 Button button_play_trailer = findViewById(R.id.button_play_trailer);
-                View view=findViewById(R.id.view);
+                View view = findViewById(R.id.view);
                 ProgressBar progressBarData = findViewById(R.id.progressBarData);
 
                 ConstraintLayout layout_description = findViewById(R.id.layout_description);
@@ -148,6 +154,8 @@ public class ActivityDetailsTv extends AppCompatActivity {
                 for (int i = 0; i < data.getGenres().size(); i++) {
                     genres = genres.concat(data.getGenres().get(i).getName().concat(", "));
                 }
+                Log.d("loco", "genres:" + genres);
+                if (genres.trim().isEmpty()) genres = "-, ";
                 textView_genres.setText(genres.substring(0, genres.length() - 2));
 
                 layout_description.setVisibility(View.VISIBLE);

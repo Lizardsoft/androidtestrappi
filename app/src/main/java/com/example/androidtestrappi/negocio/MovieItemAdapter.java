@@ -18,15 +18,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import com.example.androidtestrappi.negocio.MovieResponse.MovieItem;
+import com.example.androidtestrappi.persistencia.GetServiceThemoviedb;
+
 import java.util.Locale;
 
 public class MovieItemAdapter extends BaseAdapter implements Filterable {
-    private static final String MOVIE_BASE_URL = "http://image.tmdb.org/t/p/w780";
-    private Context context;
+    private static final String MOVIE_BASE_URL = GetServiceThemoviedb.URL_IMG + "t/p/w780";
+    private final Context context;
     private List<MovieItem> items;
-    private List<MovieItem> itemsFiltered;
+    private final List<MovieItem> itemsFiltered;
     private int page;
-    private int totalPages;
+    private final int totalPages;
 
     public int getPage() {
         return page;

@@ -11,7 +11,10 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface GetServiceThemoviedb {
-    String API_ID = "<Api Key>";
+    public static final String URL_IMG="https://image.tmdb.org/";
+    public static final String URL_BASE="https://api.themoviedb.org/3/";
+    String API_ID = "7de2655e2eab1bbf079f571eefe27729";
+
     String LANGUAGE = "es";
 
     String API_ROUTE = "{type}/{category}?api_key=" + API_ID + "&language=" + LANGUAGE;

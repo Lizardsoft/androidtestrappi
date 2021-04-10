@@ -18,10 +18,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import com.example.androidtestrappi.negocio.TvResponse.TvItem;
+import com.example.androidtestrappi.persistencia.GetServiceThemoviedb;
+
 import java.util.Locale;
 
 public class TvItemAdapter extends BaseAdapter implements Filterable {
-    private static final String MOVIE_BASE_URL = "http://image.tmdb.org/t/p/w780";
+    private static final String MOVIE_BASE_URL = GetServiceThemoviedb.URL_IMG+"t/p/w780";
     private Context context;
     private List<TvItem> items;
     private List<TvItem> itemsFiltered;

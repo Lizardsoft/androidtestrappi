@@ -1,18 +1,22 @@
 package com.example.androidtestrappi;
 
+import android.annotation.SuppressLint;
+import android.app.SearchManager;
+import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.viewpager.widget.ViewPager;
+
 import com.example.androidtestrappi.ui.main.PlaceholderFragment;
 import com.example.androidtestrappi.ui.main.SectionsPagerAdapter;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.tabs.TabLayout;
 
 public class MainActivity extends AppCompatActivity {
     private SectionsPagerAdapter sectionsPagerAdapter;
@@ -35,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         final BottomNavigationView navigationType = findViewById(R.id.navigationType);
 
         navigationType.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @SuppressLint("NonConstantResourceId")
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 PlaceholderFragment viewPagerFragment = (PlaceholderFragment) sectionsPagerAdapter.instantiateItem(viewPager, tabs.getSelectedTabPosition());
@@ -79,37 +84,42 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        SearchView action_search;
         getMenuInflater().inflate(R.menu.search_bar, menu);
         MenuItem searchItem = menu.findItem(R.id.app_seach_bar);
-        action_search = (SearchView) searchItem.getActionView();
-        action_search.setQueryHint(getString(R.string.search));
-        action_search.setIconifiedByDefault(true);
+        SearchView action_search = (SearchView) searchItem.getActionView();
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 
-        action_search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                return false;
-            }
+            assert searchManager != null;
+            action_search.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
-            @Override
-            public boolean onQueryTextChange(String s) {
-                if (s.equalsIgnoreCase("")) {
-                    for (int i = 0; i < tabs.getTabCount(); i++) {
-                        PlaceholderFragment viewPagerFragment = (PlaceholderFragment) sectionsPagerAdapter.instantiateItem(viewPager, i);
+            action_search.setQueryHint(getString(R.string.search));
+            action_search.setIconifiedByDefault(true);
+            action_search.setQueryRefinementEnabled(true);
+
+            action_search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String s) {
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String s) {
+                    if (s.equalsIgnoreCase("")) {
+                        for (int i = 0; i < tabs.getTabCount(); i++) {
+                            PlaceholderFragment viewPagerFragment = (PlaceholderFragment) sectionsPagerAdapter.instantiateItem(viewPager, i);
+                            if (viewPagerFragment.isAdded()) {
+                                viewPagerFragment.filterListview("");
+                            }
+                        }
+                    } else {
+                        PlaceholderFragment viewPagerFragment = (PlaceholderFragment) sectionsPagerAdapter.instantiateItem(viewPager, tabs.getSelectedTabPosition());
                         if (viewPagerFragment.isAdded()) {
-                            viewPagerFragment.filterListview("");
+                            viewPagerFragment.filterListview(s);
                         }
                     }
-                } else {
-                    PlaceholderFragment viewPagerFragment = (PlaceholderFragment) sectionsPagerAdapter.instantiateItem(viewPager, tabs.getSelectedTabPosition());
-                    if (viewPagerFragment.isAdded()) {
-                        viewPagerFragment.filterListview(s);
-                    }
+                    return false;
                 }
-                return false;
-            }
-        });
+            });
         return super.onCreateOptionsMenu(menu);
     }
 }

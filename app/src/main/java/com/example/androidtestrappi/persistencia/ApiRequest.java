@@ -3,7 +3,8 @@ package com.example.androidtestrappi.persistencia;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -22,7 +23,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiRequest {
-    private GetServiceThemoviedb postService;
+    private final GetServiceThemoviedb postService;
     private final OkHttpClient okHttpClient;
 
     public ApiRequest(Context context) {
@@ -39,7 +40,7 @@ public class ApiRequest {
         final Gson gson = gsonBuilder.create();
 
         final Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://api.themoviedb.org/3/")
+                .baseUrl(GetServiceThemoviedb.URL_BASE)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(okHttpClient)
                 .build();
@@ -74,7 +75,7 @@ public class ApiRequest {
         call.enqueue(callback);
     }
 
-    private class AddNetworkInterceptorCache implements Interceptor {
+    private static class AddNetworkInterceptorCache implements Interceptor {
         @Override
         public @NonNull
         Response intercept(@NonNull Chain chain) throws IOException {
@@ -89,7 +90,7 @@ public class ApiRequest {
     }
 
     private class AddInterceptorCache implements Interceptor {
-        private Context context;
+        private final Context context;
 
         AddInterceptorCache(Context context) {
             this.context = context;
@@ -114,6 +115,7 @@ public class ApiRequest {
     public boolean hasNetwork(Context context) {
         boolean isConnected = false;
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        assert connectivityManager != null;
         NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
         if (activeNetwork != null && activeNetwork.isConnected())
             isConnected = true;
